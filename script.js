@@ -1,31 +1,31 @@
-// Seleção de elementos do DOM
 const cells = document.querySelectorAll('.cell');
 const statusElement = document.getElementById('status');
 const restartBtn = document.getElementById('restartBtn');
+const resetChampionshipBtn = document.getElementById('resetChampionshipBtn');
 const scoreXElement = document.getElementById('scoreX');
 const scoreOElement = document.getElementById('scoreO');
 
-// Variáveis de estado do jogo
+// Estados do Jogo
 let board = ['', '', '', '', '', '', '', '', ''];
 let currentPlayer = 'X';
 let gameActive = true;
+let championshipActive = true; // Novo estado para controlar o campeonato todo
 let scoreX = 0;
 let scoreO = 0;
+const WINNING_SCORE = 5; // Limite de vitórias
 
-// Combinações possíveis para vitória
 const winningConditions = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8], // Linhas
-    [0, 3, 6], [1, 4, 7], [2, 5, 8], // Colunas
-    [0, 4, 8], [2, 4, 6]             // Diagonais
+    [0, 1, 2], [3, 4, 5], [6, 7, 8], 
+    [0, 3, 6], [1, 4, 7], [2, 5, 8], 
+    [0, 4, 8], [2, 4, 6]             
 ];
 
-// Função disparada ao clicar em uma célula
 function handleCellClick(e) {
     const clickedCell = e.target;
     const cellIndex = parseInt(clickedCell.getAttribute('data-index'));
 
-    // Ignora o clique se a célula já estiver preenchida ou o jogo tiver acabado
-    if (board[cellIndex] !== '' || !gameActive) {
+    // Trava o clique se o campeonato acabou ou se a célula tem algo
+    if (board[cellIndex] !== '' || !gameActive || !championshipActive) {
         return;
     }
 
@@ -33,14 +33,12 @@ function handleCellClick(e) {
     checkResult();
 }
 
-// Atualiza a interface e o array do tabuleiro
 function updateCell(cell, index) {
     board[index] = currentPlayer;
     cell.innerText = currentPlayer;
-    cell.classList.add(currentPlayer.toLowerCase()); // Adiciona classe para cor (x ou o)
+    cell.classList.add(currentPlayer.toLowerCase());
 }
 
-// Verifica se houve vitória ou empate
 function checkResult() {
     let roundWon = false;
 
@@ -53,26 +51,23 @@ function checkResult() {
     }
 
     if (roundWon) {
-        statusElement.innerText = `Vitória do Jogador ${currentPlayer}!`;
         gameActive = false;
         updateScore();
         return;
     }
 
-    // Verifica empate (não há mais espaços vazios)
     if (!board.includes('')) {
         statusElement.innerText = 'Empate (Deu Velha)!';
         gameActive = false;
         return;
     }
 
-    // Alterna o turno
     currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
     statusElement.innerText = `Vez do Jogador: ${currentPlayer}`;
 }
 
-// Atualiza o placar
 function updateScore() {
+    // Atualiza pontuação
     if (currentPlayer === 'X') {
         scoreX++;
         scoreXElement.innerText = scoreX;
@@ -80,22 +75,54 @@ function updateScore() {
         scoreO++;
         scoreOElement.innerText = scoreO;
     }
+
+    // Verifica se alguém atingiu 5 vitórias (Campeão)
+    if (scoreX === WINNING_SCORE || scoreO === WINNING_SCORE) {
+        championshipActive = false; // Trava o campeonato
+        statusElement.innerHTML = `🏆 JOGADOR ${currentPlayer} É O CAMPEÃO! 🏆`;
+        statusElement.classList.add('champion-text'); // Aplica efeito visual
+        
+        // Esconde o botão de próxima rodada e mostra o de novo campeonato
+        restartBtn.classList.add('hidden');
+        resetChampionshipBtn.classList.remove('hidden');
+    } else {
+        statusElement.innerText = `Vitória do Jogador ${currentPlayer} nesta rodada!`;
+    }
 }
 
-// Reinicia a rodada mantendo o placar intacto
 function restartGame() {
+    if (!championshipActive) return; // Não deixa reiniciar rodada se já há um campeão
+
     board = ['', '', '', '', '', '', '', '', ''];
-    currentPlayer = 'X'; // O Jogador X sempre começa a nova partida
+    currentPlayer = 'X'; 
     gameActive = true;
     statusElement.innerText = `Vez do Jogador: ${currentPlayer}`;
     
-    // Limpa o tabuleiro visualmente
     cells.forEach(cell => {
         cell.innerText = '';
         cell.classList.remove('x', 'o');
     });
 }
 
-// Adiciona os eventos de clique
+function resetChampionship() {
+    // Zera pontuações
+    scoreX = 0;
+    scoreO = 0;
+    scoreXElement.innerText = scoreX;
+    scoreOElement.innerText = scoreO;
+    
+    // Destrava o campeonato e remove os efeitos de texto
+    championshipActive = true;
+    statusElement.classList.remove('champion-text');
+    
+    // Troca os botões novamente
+    restartBtn.classList.remove('hidden');
+    resetChampionshipBtn.classList.add('hidden');
+    
+    // Reinicia o tabuleiro
+    restartGame();
+}
+
 cells.forEach(cell => cell.addEventListener('click', handleCellClick));
 restartBtn.addEventListener('click', restartGame);
+resetChampionshipBtn.addEventListener('click', resetChampionship);
