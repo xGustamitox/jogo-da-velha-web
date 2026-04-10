@@ -3,19 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo da Velha</title>
+    <title>Jogo da Velha - Campeonato</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <h1>Jogo da Velha</h1>
+        <p class="subtitle">O primeiro a atingir 5 vitórias é o campeão!</p>
         
         <div class="scoreboard">
-            <p>Jogador X: <span id="scoreX">0</span></p>
-            <p>Jogador O: <span id="scoreO">0</span></p>
+            <div class="player-score x-score">
+                <span>Jogador X</span>
+                <span id="scoreX" class="score-number">0</span>
+            </div>
+            <div class="player-score o-score">
+                <span>Jogador O</span>
+                <span id="scoreO" class="score-number">0</span>
+            </div>
         </div>
 
-        <div class="status" id="status">Vez do Jogador: X</div>
+        <div class="status-box">
+            <div class="status" id="status">Vez do Jogador: X</div>
+        </div>
 
         <div class="board" id="board">
             <div class="cell" data-index="0"></div>
@@ -29,7 +38,10 @@
             <div class="cell" data-index="8"></div>
         </div>
 
-        <button id="restartBtn">Reiniciar Partida</button>
+        <div class="controls">
+            <button id="restartBtn">Próxima Rodada</button>
+            <button id="resetChampionshipBtn" class="hidden">Iniciar Novo Campeonato</button>
+        </div>
     </div>
 
     <script src="script.js"></script>
